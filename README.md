@@ -1,0 +1,2 @@
+# RMBG_Correct_Img
+运用rmbg和opencv实现对复杂背景中主体画面的透视矫正
