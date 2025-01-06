@@ -12,6 +12,7 @@ class ImageProcess:
 
     def __init__(self, model_path, image_path):
         self.original_image = Image.open(image_path)
+        self.original_image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
         self.pre_process = ImagePreProcessor(model_path, self.original_image)
         
     
