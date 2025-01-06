@@ -3,7 +3,7 @@ import math
 import numpy as np
 import os
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 from .img_pre_process import ImagePreProcessor
 from .img_point_process import ImagePointProcessor
@@ -16,23 +16,13 @@ class ImageProcess:
         self.pre_process = ImagePreProcessor(model_path, self.original_image)
         
     
-    def process_image(self, output_dir,show = True):
+    def process_image(self):
         segmented_image, mask = self.pre_process.preprocess_image()
-        final_points, max_contour = self.find_contour_and_corners(mask, show)
+        final_points, max_contour = self.find_contour_and_corners(mask)
         transformed_image = self.perspective_transformation(final_points, segmented_image)
-        cv2.imwrite(output_dir, transformed_image)
-        if show :
-            contour_image = segmented_image.copy()
-            cv2.drawContours(contour_image, [max_contour], -1, (0, 255, 0, 255), 2)
-            for point in final_points:
-                cv2.circle(contour_image, point, 8, (0, 0, 255, 255), -1)
-            cv2.imshow("Contour Image", contour_image)
-            cv2.imshow("Transformed", transformed_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+        return segmented_image, mask, final_points, max_contour, transformed_image
 
-
-    def find_contour_and_corners(self, mask, show):
+    def find_contour_and_corners(self, mask):
         mask_array = np.array(mask)
         edges = cv2.Canny(mask_array, 50, 150)
         contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -43,16 +33,14 @@ class ImageProcess:
         points = [tuple(point[0]) for point in approx]
 
 
-        if show:
-            if len(mask_array.shape) == 2:
-                mask_array = cv2.cvtColor(mask_array, cv2.COLOR_GRAY2BGR)
-            for contour in contours:
-                cv2.drawContours(mask_array, [contour], -1, (0, 255, 0, 255), 2)
-            for point in points:
-                cv2.circle(mask_array, point, 8, (0, 0, 255, 255), -1)
-            cv2.imshow("Points Image", mask_array)
-            cv2.waitKey(0)
-
+        # if len(mask_array.shape) == 2:
+        #     mask_array = cv2.cvtColor(mask_array, cv2.COLOR_GRAY2BGR)
+        # for contour in contours:
+        #     cv2.drawContours(mask_array, [contour], -1, (0, 255, 0, 255), 2)
+        # for point in points:
+        #     cv2.circle(mask_array, point, 8, (0, 0, 255, 255), -1)
+        # cv2.imshow("Points Image", mask_array)
+        # cv2.waitKey(0)
 
 
         width, height = self.original_image.size
@@ -69,3 +57,22 @@ class ImageProcess:
         dst_points = np.array([[0, 0], [width, 0], [0, height], [width, height]], dtype=np.float32)
         h, _ = cv2.findHomography(src_points, dst_points)
         return cv2.warpPerspective(segmented_image, h, (width, height))
+
+
+    def enhance_image_pillow(image, brightness=1.3, saturation=1.5):
+        """
+        使用 PIL 对图像进行亮度和饱和度增强
+        :param image: 输入的 PIL 图像 (RGBA 或 RGB 格式)
+        :param brightness: 亮度增强的比例 (>1 增强亮度)
+        :param saturation: 饱和度增强的比例 (>1 增强饱和度)
+        :return: 增强后的图像
+        """
+        # 增强亮度
+        enhancer_brightness = ImageEnhance.Brightness(image)
+        image = enhancer_brightness.enhance(brightness)
+
+        # 增强饱和度
+        enhancer_saturation = ImageEnhance.Color(image)
+        image = enhancer_saturation.enhance(saturation)
+
+        return image
