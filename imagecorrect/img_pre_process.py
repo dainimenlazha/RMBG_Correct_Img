@@ -13,7 +13,7 @@ class ImagePreProcessor:
         
     def load_model(self, model_path):
         """加载图像分割模型"""
-        model = AutoModelForImageSegmentation.from_pretrained(model_path, trust_remote_code=True)
+        model = AutoModelForImageSegmentation.from_pretrained(model_path, revision="v2.0", trust_remote_code=True)
         torch.set_float32_matmul_precision('high')
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model.to(device)
