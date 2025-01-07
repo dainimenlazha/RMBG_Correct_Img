@@ -14,7 +14,6 @@ class ImageProcess:
         self.original_image = Image.open(image_path)
         self.original_image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
         self.pre_process = ImagePreProcessor(model_path, self.original_image)
-        
     
     def process_image(self):
         segmented_image, mask = self.pre_process.preprocess_image()
@@ -47,7 +46,6 @@ class ImageProcess:
         final_points = ImagePointProcessor.process_points(points, width, height)
         return final_points, max_contour
 
-
     def perspective_transformation(self, final_points, segmented_image):
         src_points = np.array(final_points, dtype=np.float32)
         width = int(math.sqrt((final_points[0][0] - final_points[1][0])**2 +
@@ -58,21 +56,10 @@ class ImageProcess:
         h, _ = cv2.findHomography(src_points, dst_points)
         return cv2.warpPerspective(segmented_image, h, (width, height))
 
+    def rmbg(self):
+        segmented_image, _ = self.pre_process.preprocess_image()
+        return segmented_image
 
-    def enhance_image_pillow(image, brightness=1.3, saturation=1.5):
-        """
-        使用 PIL 对图像进行亮度和饱和度增强
-        :param image: 输入的 PIL 图像 (RGBA 或 RGB 格式)
-        :param brightness: 亮度增强的比例 (>1 增强亮度)
-        :param saturation: 饱和度增强的比例 (>1 增强饱和度)
-        :return: 增强后的图像
-        """
-        # 增强亮度
-        enhancer_brightness = ImageEnhance.Brightness(image)
-        image = enhancer_brightness.enhance(brightness)
-
-        # 增强饱和度
-        enhancer_saturation = ImageEnhance.Color(image)
-        image = enhancer_saturation.enhance(saturation)
-
-        return image
+    def enhance_image(self, transformed_image, brightness=1, contrast=1, saturation=1, sharpness=1):
+        # 暂时没想到合适的图片自动美化的算法
+        pass

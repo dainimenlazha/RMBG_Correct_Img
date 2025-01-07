@@ -34,11 +34,12 @@ class ImagePreProcessor:
         pred = preds[0].squeeze()
         pred_pil = transforms.ToPILImage()(pred)
         mask = pred_pil.resize(self.original_image.size)
-        self.original_image.putalpha(mask)
+        image_temp = self.original_image.copy()
+        image_temp.putalpha(mask)
         
         # 转换为 NumPy 格式并清除背景
         mask_array = np.array(mask) / 255.0
-        image_array = np.array(self.original_image.convert("RGBA"))
+        image_array = np.array(image_temp.convert("RGBA"))
         image_array[mask_array < 0.5] = [0, 0, 0, 0]
         
         segmented_image = cv2.cvtColor(np.array(Image.fromarray(image_array, "RGBA")), cv2.COLOR_RGBA2BGRA)
