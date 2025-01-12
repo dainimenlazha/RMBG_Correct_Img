@@ -8,7 +8,7 @@ if __name__ == "__main__":
     # image_path = os.path.join(script_dir, 'test_data', 'test3.jpg')
     # image_path = os.path.join(script_dir, 'test_data', 'test4.jpg')
     # image_path = 'E:/RMBG/test5.jpg'
-    model_path = 'E:/RMBG/RMBG-2.0'
+    model_path = 'D:/pyworkspace/RMBG-2.0'
     processor = ImageProcess(model_path, image_path)
 
     segmented_image, mask, final_points, max_contour, transformed_image = processor.process_image()
